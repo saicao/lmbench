@@ -43,10 +43,10 @@ typedef unsigned char bool_t;
 #ifdef HAVE_SCHED_SETAFFINITY
 #include	<sched.h>
 #endif
-#define PORTMAP
-#include	<rpc/rpc.h>
+// #define PORTMAP
+// #include	<rpc/rpc.h>
 #endif
-#include	<rpc/types.h>
+// #include	<rpc/types.h>
 
 #include 	<stdarg.h>
 #ifndef HAVE_uint
