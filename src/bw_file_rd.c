@@ -67,7 +67,7 @@ initialize(iter_t iterations, void* cookie)
 		sprintf(buf, "%d", (int)getpid());
 		s = (char*)malloc(strlen(state->filename) + strlen(buf) + 1);
 		sprintf(s, "%s%d", state->filename, (int)getpid());
-		if (cp(state->filename, s, S_IREAD|S_IWRITE) < 0) {
+		if (cp(state->filename, s, S_IRUSR|S_IWUSR) < 0) {
 			perror("creating private tempfile");
 			unlink(s);
 			exit(1);

@@ -56,5 +56,9 @@ size_t	line_find(size_t l, int warmup, int repetitions, struct mem_state* state)
 double	line_test(size_t l, int warmup, int repetitions, struct mem_state* state);
 double	par_mem(size_t l, int warmup, int repetitions, struct mem_state* state);
 
+#ifdef __ANDROID__
+void * valloc(size_t size);
+#endif
+
 #endif /* LMBENCH_MEM_H */
 

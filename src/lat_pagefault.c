@@ -110,7 +110,7 @@ initialize(iter_t iterations, void* cookie)
 		sprintf(buf, "%d", (int)getpid());
 		s = (char*)malloc(strlen(state->file) + strlen(buf) + 1);
 		sprintf(s, "%s%d", state->file, (int)getpid());
-		if (cp(state->file, s, S_IREAD|S_IWRITE) < 0) {
+		if (cp(state->file, s, S_IRUSR|S_IWUSR) < 0) {
 			perror("Could not copy file");
 			unlink(s);
 			exit(1);

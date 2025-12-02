@@ -14,6 +14,8 @@
 
 #include "bench.h"
 
+
+
 #define	FIVE(m)		m m m m m
 #define	TEN(m)		FIVE(m) FIVE(m)
 #define	FIFTY(m)	TEN(m) TEN(m) TEN(m) TEN(m) TEN(m)
@@ -47,6 +49,7 @@ mem_benchmark_##N(iter_t iterations, void *cookie)			\
 	mem_benchmark_rerun = 1;					\
 }
 
+
 MEM_BENCHMARK_DEF(0, REPEAT_0, DEREF)
 MEM_BENCHMARK_DEF(1, REPEAT_1, DEREF)
 MEM_BENCHMARK_DEF(2, REPEAT_2, DEREF)
@@ -63,6 +66,7 @@ MEM_BENCHMARK_DEF(12, REPEAT_12, DEREF)
 MEM_BENCHMARK_DEF(13, REPEAT_13, DEREF)
 MEM_BENCHMARK_DEF(14, REPEAT_14, DEREF)
 MEM_BENCHMARK_DEF(15, REPEAT_15, DEREF)
+
 
 
 size_t*	words_initialize(size_t max, int scale);
@@ -701,5 +705,13 @@ par_mem(size_t len, int warmup, int repetitions, struct mem_state* state)
 
 	return max_par;
 }
-
-
+#ifdef __ANDROID__
+void * valloc(size_t size) {
+	void *ptr = NULL;
+	int result = posix_memalign(&ptr, sysconf(_SC_PAGESIZE), size);
+	if (result != 0) {
+		return NULL;
+	}
+	return ptr;
+}
+#endif
