@@ -1,0 +1,54 @@
+include(CheckCSourceCompiles)
+include(CheckIncludeFile)
+include(CheckSymbolExists)
+
+set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+
+set(LMBENCH_SUPPORTED_PLATFORM OFF)
+if(CMAKE_SYSTEM_NAME MATCHES "^(Linux|Android|Darwin|OHOS)$")
+  set(LMBENCH_SUPPORTED_PLATFORM ON)
+endif()
+
+if(NOT LMBENCH_SUPPORTED_PLATFORM)
+  message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
+endif()
+
+check_symbol_exists(valloc "stdlib.h" LMBENCH_HAVE_VALLOC)
+if(NOT LMBENCH_HAVE_VALLOC)
+  set(LMBENCH_NEED_VALLOC ON)
+endif()
+
+check_include_file("sys/sem.h" LMBENCH_HAVE_SYS_SEM_H)
+set(LMBENCH_HAVE_SYSV_SEM OFF)
+if(LMBENCH_HAVE_SYS_SEM_H AND NOT CMAKE_SYSTEM_NAME MATCHES "^(Android|OHOS)$")
+  set(LMBENCH_HAVE_SYSV_SEM ON)
+endif()
+
+set(LMBENCH_HAVE_REALTIME_SLEEP OFF)
+if(CMAKE_SYSTEM_NAME MATCHES "^(Linux|Android|OHOS)$")
+  set(LMBENCH_HAVE_REALTIME_SLEEP ON)
+endif()
+
+set(LMBENCH_MAP_ANONYMOUS_DEFINITION)
+if(APPLE)
+  list(APPEND LMBENCH_MAP_ANONYMOUS_DEFINITION MAP_ANONYMOUS=MAP_ANON)
+endif()
+
+set(CMAKE_REQUIRED_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/src")
+set(CMAKE_REQUIRED_FLAGS "")
+if(CMAKE_C_COMPILER_ID MATCHES "Clang|GNU")
+  set(CMAKE_REQUIRED_FLAGS "-std=gnu89")
+endif()
+check_c_source_compiles(
+  "#include \"bw_mem64a.c\""
+  LMBENCH_CAN_BUILD_BW_MEM64A
+)
+unset(CMAKE_REQUIRED_INCLUDES)
+unset(CMAKE_REQUIRED_FLAGS)
+
+if(LMBENCH_ENABLE_RPC)
+  check_include_file("rpc/rpc.h" LMBENCH_HAVE_RPC_RPC_H)
+else()
+  set(LMBENCH_HAVE_RPC_RPC_H OFF)
+endif()
+

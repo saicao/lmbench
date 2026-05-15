@@ -33,6 +33,12 @@ typedef unsigned char bool_t;
 #include        <sys/mman.h>
 #endif
 #include        <sys/stat.h>
+#if !defined(S_IREAD) && defined(S_IRUSR)
+#define S_IREAD S_IRUSR
+#endif
+#if !defined(S_IWRITE) && defined(S_IWUSR)
+#define S_IWRITE S_IWUSR
+#endif
 #ifndef WIN32
 #include        <sys/wait.h>
 #include	<time.h>

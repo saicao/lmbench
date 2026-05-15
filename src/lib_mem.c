@@ -701,5 +701,13 @@ par_mem(size_t len, int warmup, int repetitions, struct mem_state* state)
 
 	return max_par;
 }
-
-
+#ifdef LMBENCH_NEED_VALLOC
+void * valloc(size_t size) {
+	void *ptr = NULL;
+	int result = posix_memalign(&ptr, sysconf(_SC_PAGESIZE), size);
+	if (result != 0) {
+		return NULL;
+	}
+	return ptr;
+}
+#endif

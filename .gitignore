@@ -4,3 +4,4 @@ GTAGS
 
 *.ver
 .vscode/
+build*/

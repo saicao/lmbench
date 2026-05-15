@@ -1,0 +1,53 @@
+{
+  "version": 7,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 25,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "common",
+      "hidden": true,
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "linux",
+      "inherits": "common",
+      "binaryDir": "${sourceDir}/build.linux",
+      "description": "Configure lmbench for Linux"
+    },
+    {
+      "name": "macos",
+      "inherits": "common",
+      "binaryDir": "${sourceDir}/build.macos",
+      "description": "Configure lmbench for macOS"
+    },
+    {
+      "name": "android",
+      "inherits": "common",
+      "binaryDir": "${sourceDir}/build.android",
+      "description": "Configure lmbench for Android arm64",
+      "toolchainFile": "/Users/cputest/Library/Android/sdk/ndk/29.0.14206865/build/cmake/android.toolchain.cmake",
+      "cacheVariables": {
+        "ANDROID_ABI": "arm64-v8a",
+        "ANDROID_PLATFORM": "android-28"
+      }
+    },
+    {
+      "name": "ohos",
+      "inherits": "common",
+      "binaryDir": "${sourceDir}/build.ohos",
+      "description": "Configure lmbench for OpenHarmony arm64",
+      "toolchainFile": "/Users/cputest/Library/OpenHarmony/Sdk/20/native/build/cmake/ohos.toolchain.cmake",
+      "cmakeExecutable": "/Users/cputest/Library/OpenHarmony/Sdk/20/native/build-tools/cmake/bin/cmake",
+      "cacheVariables": {
+        "OHOS_STL": "c++_static"
+      }
+    }
+  ]
+}
