@@ -150,7 +150,9 @@ cleanup(iter_t iterations, void *cookie)
 
 static inline void delay(int nr_nop)
 {
-	for (register int j = 0; j < nr_nop; j++)
+	register int j;
+
+	for (j = 0; j < nr_nop; j++)
 		asm volatile("nop");
 }
 

@@ -52,3 +52,20 @@ else()
   set(LMBENCH_HAVE_RPC_RPC_H OFF)
 endif()
 
+if(LMBENCH_HAVE_RPC_RPC_H)
+  set(CMAKE_REQUIRED_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/src")
+  set(CMAKE_REQUIRED_DEFINITIONS -DLMBENCH_ENABLE_RPC=1)
+  set(CMAKE_REQUIRED_FLAGS "")
+  if(CMAKE_C_COMPILER_ID MATCHES "Clang|GNU")
+    set(CMAKE_REQUIRED_FLAGS "-std=gnu89")
+  endif()
+  check_c_source_compiles(
+    "#include \"lat_rpc.c\""
+    LMBENCH_CAN_BUILD_LAT_RPC
+  )
+  unset(CMAKE_REQUIRED_INCLUDES)
+  unset(CMAKE_REQUIRED_DEFINITIONS)
+  unset(CMAKE_REQUIRED_FLAGS)
+else()
+  set(LMBENCH_CAN_BUILD_LAT_RPC OFF)
+endif()

@@ -49,10 +49,13 @@ typedef unsigned char bool_t;
 #ifdef HAVE_SCHED_SETAFFINITY
 #include	<sched.h>
 #endif
-#define PORTMAP
+#ifdef LMBENCH_ENABLE_RPC
 #include	<rpc/rpc.h>
 #endif
+#endif
+#ifdef LMBENCH_ENABLE_RPC
 #include	<rpc/types.h>
+#endif
 
 #include 	<stdarg.h>
 #ifndef HAVE_uint
