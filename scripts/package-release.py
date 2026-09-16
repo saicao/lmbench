@@ -42,6 +42,9 @@ def main():
             info = (root / "share/lmbench/BUILD-INFO.txt").read_text()
             if f"Configuration: {config}\n" not in info:
                 parser.error(f"wrong build configuration in {root}")
+            expected_flags = "-O -g" if variant == "O1" else "-O2 -g -DNDEBUG"
+            if f"Configuration C flags: {expected_flags}\n" not in info:
+                parser.error(f"wrong optimization/debug flags in {root}")
             if "Source revision: unknown\n" in info:
                 parser.error(f"source revision is not recorded in {root}")
             revisions.update(line for line in info.splitlines() if line.startswith("Source revision:"))

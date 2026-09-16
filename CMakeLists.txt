@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.25)
 
+# Presets select O1 before project() enables C; initialize the custom profile
+# here so CMake does not create an empty CMAKE_C_FLAGS_O1 cache entry first.
+set(CMAKE_C_FLAGS_O1_INIT "-O -g")
+
 project(lmbench VERSION 3.0 LANGUAGES C)
 
 include(GNUInstallDirs)
