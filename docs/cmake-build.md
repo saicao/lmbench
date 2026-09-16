@@ -25,11 +25,62 @@ The default install prefix is `<build-dir>/install`. Executables are installed
 to `bin`, documentation to `share/lmbench/doc`, and scripts to
 `share/lmbench/scripts`.
 
-The default CMake build type is `RelWithDebInfo`, matching the presets. On
-GCC/Clang-like compilers this normally means `-O2 -g -DNDEBUG`. This differs
-from the historical Makefile's `CFLAGS=-O`; use `-DCMAKE_BUILD_TYPE=Release`,
-`Debug`, or another CMake build type if a different optimization/debug profile
-is needed.
+The default CMake build type is `O1`, matching the historical Makefile's
+`CFLAGS=-O` optimization level. Its configuration flags are `-O -g`: GCC and
+Clang treat `-O` as `-O1`, and `-g` retains debug information for profiling.
+Platform/toolchain compatibility flags still apply.
+This applies both to a fresh plain CMake build and the platform presets.
+Existing build directories keep their cached build type; reconfigure with a
+platform preset or `-DCMAKE_BUILD_TYPE=O1` to select the new default explicitly.
+
+Each platform also has an O2 preset (`linux-o2`, `macos-o2`, `android-o2`,
+`ohos-o2`) using `RelWithDebInfo` (`-O2 -g -DNDEBUG`) and a separate build
+directory. For example:
+
+```sh
+cmake --preset android-o2
+cmake --build build.android-o2
+cmake --install build.android-o2
+```
+
+Standard `Debug`, `Release`, and `RelWithDebInfo` configurations retain CMake's
+normal behavior. Explicit flags such as `-DCMAKE_C_FLAGS_O1=...` remain supported.
+O1 does not guarantee scalar-only instructions: compilers may still combine
+adjacent accesses into `LDP`/`STP`. The benchmark sources are unchanged.
+
+Each installation records its compiler, target, configuration, C flags, and
+source revision in `share/lmbench/BUILD-INFO.txt`. Release builds set
+`LMBENCH_SOURCE_REVISION` to the full Git commit and `LMBENCH_VERSION` to the
+release-specific version string.
+
+## Release packaging
+
+Every release provides exactly two binary download archives, O1 and O2. Each
+archive contains all four platform installations (`android`, `linux-aarch64`,
+`macos`, `ohos`), including the complete supported tool set, documentation,
+licenses, and build metadata. Both variants compile with debug information.
+Release archives contain stripped executables in each platform's `bin/` and
+separate matching symbols in `symbols/`: ELF `.debug` files for Android, Linux,
+and OHOS, and `.dSYM` bundles for macOS. Extract the symbols before stripping;
+retain the original local build artifacts for disassembly and debugging.
+GitHub also displays its automatic source archives.
+
+Use clean build directories for all eight builds. Stage each installation under
+`<stage>/<O1|O2>/<platform>` using `cmake --install <build> --prefix <path>`, then:
+
+```sh
+python3 scripts/package-release.py --version 20260916 --stage /path/to/stage --output /path/to/assets
+```
+
+The script checks all platform installations, embeds a per-file `SHA256SUMS`,
+and produces `lmbench-20260916-O1.tar.gz` and `lmbench-20260916-O2.tar.gz`.
+It also writes the archive checksums to a local `SHA256SUMS` file: include these
+in the release description and upload only the two `.tar.gz` binary assets.
+Record any SDK or toolchain changes in the release description as well.
+
+If local SDK paths differ from the presets, override the toolchain explicitly
+with `--toolchain /path/to/toolchain.cmake` when configuring. Use the same
+compiler and SDK for both optimization variants of a platform.
 
 ## Options
 
