@@ -28,6 +28,7 @@ option(LMBENCH_BUILD_OPTIONAL "Build optional lmbench tools" ON)
 option(LMBENCH_ENABLE_RPC "Build RPC benchmarks when the platform provides ONC RPC" OFF)
 option(LMBENCH_STRICT_WARNINGS "Build lmbench with strict compiler warnings" OFF)
 option(LMBENCH_INSTALL_SCRIPTS "Install lmbench scripts and generated driver" ON)
+option(LMBENCH_BW_MEM_SCALAR "Experimental O1 scalar code generation for bw_mem.c only" OFF)
 
 set(LMBENCH_VERSION "3.0-a9" CACHE STRING "Version string embedded in the lmbench driver")
 set(LMBENCH_SOURCE_REVISION "unknown" CACHE STRING "Source commit recorded in build metadata")
@@ -40,6 +41,7 @@ endif()
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}")
 
 include(cmake/lmbench-platform.cmake)
+include(cmake/lmbench-scalar.cmake)
 
 add_subdirectory(src)
 

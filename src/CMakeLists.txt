@@ -1,5 +1,10 @@
 find_package(Threads REQUIRED)
 
+if(LMBENCH_BW_MEM_SCALAR)
+  set_source_files_properties(bw_mem.c PROPERTIES
+    COMPILE_OPTIONS "${LMBENCH_BW_MEM_SCALAR_FLAGS}")
+endif()
+
 set(LMBENCH_BUILT_TARGETS)
 set(LMBENCH_SKIPPED_TARGETS)
 

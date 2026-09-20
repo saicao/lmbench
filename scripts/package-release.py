@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Package staged platform installations into the O1 and O2 release assets."""
+"""Package staged platform installations; default O1/O2, optional O1-scalar."""
 
 import argparse
 import hashlib
@@ -10,7 +10,7 @@ import tarfile
 
 
 PLATFORMS = ("android", "linux-aarch64", "macos", "ohos")
-VARIANTS = {"O1": "O1", "O2": "RelWithDebInfo"}
+VARIANTS = {"O1": "O1", "O2": "RelWithDebInfo", "O1-scalar": "O1"}
 
 
 def digest(path):
@@ -26,13 +26,17 @@ def main():
     parser.add_argument("--version", required=True)
     parser.add_argument("--stage", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--variants", nargs="+", choices=VARIANTS,
+                        default=["O1", "O2"], help="default: O1 O2")
     args = parser.parse_args()
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", args.version):
         parser.error("version must be a filename-safe release identifier")
 
-    # Validate both variants before writing either archive.
+    # Validate all requested variants before writing any archive.
+    variants = dict.fromkeys(args.variants)
     revisions = set()
-    for variant, config in VARIANTS.items():
+    for variant in variants:
+        config = VARIANTS[variant]
         for platform in PLATFORMS:
             root = args.stage / variant / platform
             for required in ("bin/bw_mem", "bin/bw_mem64", "bin/hello",
@@ -42,9 +46,13 @@ def main():
             info = (root / "share/lmbench/BUILD-INFO.txt").read_text()
             if f"Configuration: {config}\n" not in info:
                 parser.error(f"wrong build configuration in {root}")
-            expected_flags = "-O -g" if variant == "O1" else "-O2 -g -DNDEBUG"
+            expected_flags = "-O -g" if config == "O1" else "-O2 -g -DNDEBUG"
             if f"Configuration C flags: {expected_flags}\n" not in info:
                 parser.error(f"wrong optimization/debug flags in {root}")
+            if variant == "O1-scalar" and "Experimental bw_mem scalar: ON\n" not in info:
+                parser.error(f"scalar option is not enabled in {root}")
+            if variant != "O1-scalar" and "Experimental bw_mem scalar: ON\n" in info:
+                parser.error(f"unexpected scalar option in {root}")
             if "Source revision: unknown\n" in info:
                 parser.error(f"source revision is not recorded in {root}")
             revisions.update(line for line in info.splitlines() if line.startswith("Source revision:"))
@@ -64,7 +72,7 @@ def main():
 
     args.output.mkdir(parents=True, exist_ok=True)
     archive_hashes = []
-    for variant in VARIANTS:
+    for variant in variants:
         name = f"lmbench-{args.version}-{variant}"
         archive = args.output / f"{name}.tar.gz"
         root = args.stage / variant

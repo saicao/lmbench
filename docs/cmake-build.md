@@ -131,3 +131,52 @@ cmake --build build.ohos
 ```
 
 For Linux, run the same native flow with `cmake --preset linux` on a Linux host.
+# Experimental scalar bw_mem package
+
+The opt-in `LMBENCH_BW_MEM_SCALAR=ON` setting produces the `O1-scalar`
+experiment. It changes compiler options only: no benchmark C source, function
+splitting, `volatile`, or inline assembly is introduced. It requires an
+AArch64 single-config `O1` build without LTO. Example:
+
+```sh
+cmake --preset android -B build.android-scalar -DLMBENCH_BW_MEM_SCALAR=ON
+cmake --build build.android-scalar
+```
+
+Only `bw_mem.c` receives additional flags. This affects the entire file,
+including functions other than `frd` and `fwr`; other tools (including
+`bw_mem64`) and the common timing library retain their normal O1 options.
+
+Clang/AppleClang flags:
+
+```text
+-mllvm -aarch64-enable-ldst-opt=false
+-mllvm -aarch64-enable-mcr=false
+-mllvm -combiner-store-merging=false
+```
+
+GCC AArch64 flags (validated with GCC 16.2.1):
+
+```text
+--param=aarch64-ldp-policy=never
+--param=aarch64-stp-policy=never
+```
+
+With the validated toolchains, the 512-byte data-access body of `frd` has
+128 scalar `LDR W` operations and a serial scalar addition chain; `fwr` has
+128 scalar `STR W` operations. Pair and vector data accesses are absent.
+Function prologues/epilogues may still save/restore registers with LDP/STP.
+This is **not** a promise of identical assembly across platforms: scheduling,
+register allocation, reduction placement and loop control differ between
+Android Clang, OHOS Clang, AppleClang and GCC. Recheck generated assembly when
+changing compilers; LLVM internal switches and GCC parameters can change.
+
+The experimental third archive is separate from the unchanged O1/O2 release
+assets. It contains all four platforms' complete tool sets with stripped
+executables and matching separate debug symbols. Its `BUILD-INFO.txt` records
+the option and actual extra flags. To package staged builds:
+
+```sh
+python3 scripts/package-release.py --version 20260920 \
+  --stage PATH_TO_STAGE --output PATH_TO_NEW_OUTPUT --variants O1-scalar
+```
