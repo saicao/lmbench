@@ -15,6 +15,7 @@
  */
 #define	 _LIB /* bench.h needs this */
 #include "bench.h"
+#include <limits.h>
 
 /* #define _DEBUG */
 
@@ -1773,6 +1774,7 @@ permutation(int max, int scale)
 {
 	size_t	i, v;
 	static size_t r = 0;
+	const char *seed_text = getenv("LMBENCH_SEED");
 	size_t*	result = (size_t*)malloc(max * sizeof(size_t));
 
 	if (result == NULL) return NULL;
@@ -1781,8 +1783,26 @@ permutation(int max, int scale)
 		result[i] = i * (size_t)scale;
 	}
 
-	if (r == 0)
+	if (seed_text) {
+		char *end;
+		unsigned long seed;
+
+		errno = 0;
+		seed = strtoul(seed_text, &end, 10);
+		if (!isdigit((unsigned char)seed_text[0]) || errno == ERANGE
+		    || *end || seed > UINT_MAX) {
+			fprintf(stderr, "Invalid LMBENCH_SEED: expected a decimal "
+				"integer in [0, %u]\n", UINT_MAX);
+			exit(1);
+		}
+		/* Reset both states for each permutation, independent of PID. */
+		srand((unsigned int)seed);
+		r = (size_t)seed;
+		r ^= (size_t)rand();
+		r ^= (size_t)rand() << 10;
+	} else if (r == 0) {
 		r = (getpid()<<6) ^ getppid() ^ rand() ^ (rand()<<10);
+	}
 
 	/* randomize the sequence */
 	for (i = max - 1; i > 0; --i) {

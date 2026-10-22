@@ -13,6 +13,9 @@ lat_mem_rd \- memory read latency benchmark
 [
 .I "-N <repetitions>"
 ]
+[
+.I "-t [-p <chase-page-size>]"
+]
 .I "size_in_megabytes"
 .I "stride"
 [
@@ -54,6 +57,36 @@ sequential access patterns, and some were able to prefetch for strided
 forward access patterns, but only a few could prefetch for backward
 strided patterns.  These capabilities are becoming more widespread
 in newer processors.
+.SH ENVIRONMENT
+.B LMBENCH_SEED
+selects a repeatable page permutation. Set it to a decimal unsigned integer
+from 0 through 4294967295. Zero is a fixed seed. An empty or invalid value
+is an error. When unset, historical PID-based behavior is retained.
+.LP
+The existing permutation function reads this variable directly. No seed
+command-line option is added. It applies to calls to that function, including
+thrash page selection. It does not turn stride mode into thrash mode.
+Each child created by -P inherits the same seed and allocates its own memory.
+.LP
+Each permutation resets both the libc random generator and the accumulator.
+For the same implementation, libc, word size, arena and chase page size,
+page selection is independent of PIDs and earlier working-set points.
+Different working-set points use prefixes of the same page permutation.
+Allocation, pointer-chain layout, warmup, load loop and minimum-sample
+selection are unchanged. The fixed seed uses the same sequence as the
+previous seed-option implementation.
+.LP
+ASLR and physical mappings may differ. A seed that gives low refill counts
+on one core does not guarantee zero misses or identical latency on every run.
+Seeds are not interchangeable with xcb's mt19937-based generator.
+.LP
+For a 256 MiB arena and 64-byte stride:
+.sp
+.ft CB
+LMBENCH_SEED=2327 lat_mem_rd -t -N 3 256 64
+.ft
+.LP
+Use a command-scoped assignment as above to limit the setting to that run.
 .SH OUTPUT
 Output format is intended as input to \fBxgraph\fP or some similar program
 (we use a perl script that produces pic input).

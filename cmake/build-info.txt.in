@@ -1,0 +1,16 @@
+lmbench version: @LMBENCH_VERSION@
+Source revision: @LMBENCH_SOURCE_REVISION@
+System: @CMAKE_SYSTEM_NAME@
+Architecture: @CMAKE_SYSTEM_PROCESSOR@
+Compiler: @CMAKE_C_COMPILER_ID@ @CMAKE_C_COMPILER_VERSION@
+Compiler target: @CMAKE_C_COMPILER_TARGET@
+Configuration: $<CONFIG>
+Global C flags: @CMAKE_C_FLAGS@
+Configuration C flags: @LMBENCH_CONFIG_FLAGS@
+Android ABI: @ANDROID_ABI@
+Android platform: @ANDROID_PLATFORM@
+OHOS platform: @OHOS_PLATFORM@
+OHOS SDK version: @SDK_NATIVE_VERSION@
+OHOS compatible SDK version: @OHOS_COMPATIBLE_SDK_VERSION@
+Optional tools: @LMBENCH_BUILD_OPTIONAL@
+RPC enabled: @LMBENCH_ENABLE_RPC@
